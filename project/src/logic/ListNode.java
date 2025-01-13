@@ -1,11 +1,12 @@
 package logic;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public abstract class ListNode {
 
     private String nodeName, nodeDescription;
-    private List<TaskNode> children;
+    private ArrayList<TaskNode> children = new ArrayList<>();
 
     public ListNode(String nodeName, String nodeDescription) {
         this.nodeName = nodeName;
@@ -34,7 +35,7 @@ public abstract class ListNode {
         this.nodeDescription = nodeDescription;
     }
 
-    public void setChildren(List<TaskNode> children) {
+    public void setChildren(ArrayList<TaskNode> children) {
         this.children = children;
     }
 
