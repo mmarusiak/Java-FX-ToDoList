@@ -46,4 +46,8 @@ public abstract class ListNode {
     public void removeChild(TaskNode child) {
         children.remove(child);
     }
+
+    public String getId(){
+        return nodeName.replaceAll(" ", "") + hashCode();
+    }
 }

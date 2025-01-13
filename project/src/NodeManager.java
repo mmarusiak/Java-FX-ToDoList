@@ -14,54 +14,71 @@ public class NodeManager {
     @FXML
     private VBox toDoSection;
 
-    public void updateScene() throws IOException {
+    public void initializeScene() throws IOException {
 
-        toDoSection.getChildren().removeAll();
-
-        addElementsFromTitleNode(TitleNode.doneTasks);
-        addElementsFromTitleNode(TitleNode.highPriorityTasks);
-        addElementsFromTitleNode(TitleNode.lowPriorityTasks);
+        initializeElementsFromTitleNode(TitleNode.highPriorityTasks);
+        initializeElementsFromTitleNode(TitleNode.mediumPriorityTasks);
+        initializeElementsFromTitleNode(TitleNode.lowPriorityTasks);
+        initializeElementsFromTitleNode(TitleNode.unassignedTasks);
+        initializeElementsFromTitleNode(TitleNode.doneTasks);
     }
-    private <T extends ListNode> void addElementsFromTitleNode(T parentNode) throws IOException {
+
+    public void clearScene(){
+        toDoSection.getChildren().clear();
+    }
+
+    public void updateScene(ListNode parent, TaskNode targetNode) throws IOException {
+        parent.addChild(targetNode);
+        System.out.println(parent.getNodeName() + parent.hashCode());
+        VBox parentBox = (VBox) toDoSection.lookup("#" + parent.getId());
+        parentBox.getChildren().add(createFXNode(targetNode));
+    }
+
+    private <T extends ListNode> void initializeElementsFromTitleNode(T parentNode) throws IOException {
 
         VBox mySection = new VBox();
-        addElementsFromTitleNode(parentNode, mySection);
+        initializeElementsFromTitleNode(parentNode, mySection);
         toDoSection.getChildren().add(mySection);
     }
 
 
-    private <T extends ListNode> void addElementsFromTitleNode(T parentNode, VBox container) throws IOException{
+    private <T extends ListNode> void initializeElementsFromTitleNode(T parentNode, VBox container) throws IOException{
 
-        System.out.println(parentNode.getNodeName());
+        VBox baseElement = createFXNode(parentNode);
 
+        if(!parentNode.getChildren().isEmpty()) {
+            for (var child : parentNode.getChildren()) {
+                initializeElementsFromTitleNode(child, baseElement);
+            }
+        }
+        // Add the base element to the container
+        container.getChildren().add(baseElement);
+    }
+
+    private VBox createFXNode(ListNode node) throws IOException {
         FXMLLoader baseNodeLoader = new FXMLLoader(getClass().getResource("resources/TaskNode.fxml"));
 
-        VBox myContainer = new VBox();
-        HBox baseElement = baseNodeLoader.load();
+        VBox baseElement = baseNodeLoader.load();
+        baseElement.setId(node.getId());
 
         // Access the components inside the loaded base element
         Label dynamicLabel = (Label) baseElement.lookup("#nodeTitle");
         Button dynamicButton = (Button) baseElement.lookup("#nodeButton");
 
         // Customize the label and button
-        dynamicLabel.setText(parentNode.getNodeName());
+        dynamicLabel.setText(node.getNodeName());
         dynamicButton.setOnAction(e ->{
-            System.out.println(parentNode.getNodeDescription() + " clicked!");
-            parentNode.addChild(new TaskNode("Example", "Lorem lorem", parentNode));
+            System.out.println(node.getNodeDescription() + " clicked!");
             try {
-                updateScene();
+                var newNode = new TaskNode("Example", "lorem ipsum", node);
+                updateScene(node, newNode);
             } catch (IOException ex) {
                 throw new RuntimeException(ex);
             }
         });
 
-        myContainer.getChildren().add(baseElement);
-        if(!parentNode.getChildren().isEmpty()) {
-            for (var child : parentNode.getChildren()) {
-                addElementsFromTitleNode(child, myContainer);
-            }
-        }
-        // Add the base element to the container
-        container.getChildren().add(myContainer);
+        return baseElement;
     }
+
+    private void findElementById(){}
 }
