@@ -1,9 +1,9 @@
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
+import javafx.scene.control.CheckBox;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
 import logic.ListNode;
 import logic.TaskNode;
 import logic.TitleNode;
@@ -56,29 +56,29 @@ public class NodeManager {
     }
 
     private VBox createFXNode(ListNode node) throws IOException {
-        FXMLLoader baseNodeLoader = new FXMLLoader(getClass().getResource("resources/TaskNode.fxml"));
+
+        FXMLLoader baseNodeLoader = new FXMLLoader(getClass().getResource("resources/fxml/TaskNode.fxml"));
 
         VBox baseElement = baseNodeLoader.load();
         baseElement.setId(node.getId());
 
-        // Access the components inside the loaded base element
-        Label dynamicLabel = (Label) baseElement.lookup("#nodeTitle");
-        Button dynamicButton = (Button) baseElement.lookup("#nodeButton");
+        HBox hBox = (HBox) baseElement.getChildren().getFirst();
+        Text title = (Text) hBox.lookup("#nodeTitle");
+        Text description = (Text) hBox.lookup("#nodeDescription");
+        CheckBox checkBox = (CheckBox) hBox.lookup("#checkBox");
 
-        // Customize the label and button
-        dynamicLabel.setText(node.getNodeName());
-        dynamicButton.setOnAction(e ->{
-            System.out.println(node.getNodeDescription() + " clicked!");
-            try {
-                var newNode = new TaskNode("Example", "lorem ipsum", node);
-                updateScene(node, newNode);
-            } catch (IOException ex) {
-                throw new RuntimeException(ex);
-            }
-        });
+        if(node instanceof TitleNode){
+            title.setStyle("-fx-font-weight: bold;");
+            hBox.getChildren().remove(checkBox);
+        }
+
+        title.setText(node.getNodeName());
+        description.setText(node.getNodeDescription());
 
         return baseElement;
     }
 
-    private void findElementById(){}
+    public void createNewTask(){
+        System.out.println("Creating new task");
+    }
 }
