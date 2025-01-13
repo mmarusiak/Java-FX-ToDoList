@@ -6,7 +6,8 @@
 <?import javafx.scene.text.Text?>
 <?import javafx.scene.control.CheckBox?>
 
-<VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" alignment="CENTER" stylesheets="@../css/styles.css">
+<?import logic.NodeBox?>
+<NodeBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" alignment="CENTER" stylesheets="@../css/styles.css">
     <HBox>
         <CheckBox fx:id="checkBox">
 
@@ -20,4 +21,4 @@
             </Text>
         </VBox>
     </HBox>
-</VBox>
+</NodeBox>

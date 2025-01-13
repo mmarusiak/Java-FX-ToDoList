@@ -2,6 +2,10 @@ VBox {
     -fx-spacing: 10, 10, 10, 10;
 }
 
+#toDoSection VBox, #toDoSection {
+    -fx-alignment: center_right;
+}
+
 #toDoSection HBox {
     -fx-background-color: #F0F0F0;
     -fx-padding: 20px;
