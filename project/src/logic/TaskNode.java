@@ -1,9 +1,13 @@
 package logic;
 
+import java.beans.PropertyChangeSupport;
+import java.beans.PropertyChangeListener;
+
 public class TaskNode extends ListNode{
 
     private ListNode parent;
     private float state = 0;
+    private final PropertyChangeSupport support = new PropertyChangeSupport(this);
 
     public TaskNode(String name, String description, ListNode parent){
         super(name, description);
@@ -45,8 +49,17 @@ public class TaskNode extends ListNode{
     }
 
     public void setState(float state) {
+        support.firePropertyChange("state", this.state, state);
         this.state = state;
 
         parent.updateNodeState(this);
+    }
+
+    public void addPropertyChangeListener(PropertyChangeListener listener) {
+        support.addPropertyChangeListener(listener);
+    }
+
+    public void removePropertyChangeListener(PropertyChangeListener listener) {
+        support.removePropertyChangeListener(listener);
     }
 }

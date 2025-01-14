@@ -4,6 +4,7 @@ import javafx.geometry.Bounds;
 import javafx.scene.Node;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.TransferMode;
@@ -24,7 +25,7 @@ public class NodeManager {
     @FXML
     private HBox mainApp;
     @FXML
-    private TextArea newTitleArea, newDescriptionArea;
+    private TextField newTitleArea, newDescriptionArea;
 
     public void initializeScene() throws IOException {
 
@@ -33,6 +34,11 @@ public class NodeManager {
         initializeElementsFromTitleNode(TitleNode.lowPriorityTasks);
         initializeElementsFromTitleNode(TitleNode.unassignedTasks);
         initializeElementsFromTitleNode(TitleNode.doneTasks);
+
+        //newTitleArea.setWrapText(false);
+        //newDescriptionArea.setWrapText(false);
+        //newTitleArea.setPrefWidth(80);
+        //newTitleArea.setMaxWidth(80);
     }
 
     public void clearScene(){
@@ -43,7 +49,32 @@ public class NodeManager {
         parent.addChild(targetNode);
         System.out.println(parent.getNodeName() + parent.hashCode());
         VBox parentBox = (VBox) toDoSection.lookup("#" + parent.getId());
-        parentBox.getChildren().add(createFXNode(targetNode, false));
+        addNodeToParentNode(createFXNode(targetNode, false), parentBox, 0);
+    }
+
+    public void addNodeToParentNode(NodeBox child, Pane targetParent, double targetY){
+
+
+        if((child.getParent()) != null) ((Pane)child.getParent()).getChildren().remove(child);
+
+        // Determine where to insert the dragged NodeBox
+        int dropIndex = calculateDropIndex(targetParent, targetY);
+
+        // Add TitleBox to the target container at the correct position
+        if(child.isTitleNode()) targetParent.getChildren().add(dropIndex, child);
+        else{
+            Pane actualTarget = getTargetContainer(child, targetParent, targetY);
+            dropIndex = calculateDropIndex(actualTarget, targetY);
+            actualTarget.getChildren().add(Math.max(dropIndex, 1), child);
+
+            ListNode parent = ((NodeBox) actualTarget).getMyNode();
+            TaskNode taskNode = (TaskNode) child.getMyNode();
+            taskNode.setParent(parent);
+
+            double width = (double) 400 - 30 * (getDepthOfNode(child) - 6);
+            child.setStyle("-fx-max-width: " + width + ";-fx-min-width: " + width + ";");
+            System.out.println(child.getStyle());
+        }
     }
 
     private <T extends ListNode> void initializeElementsFromTitleNode(T parentNode) throws IOException {
@@ -79,6 +110,7 @@ public class NodeManager {
         HBox hBox = (HBox) baseElement.getChildren().getFirst();
         Text title = (Text) hBox.lookup("#nodeTitle");
         Text description = (Text) hBox.lookup("#nodeDescription");
+        Text nodeDone = (Text) hBox.lookup("#nodeDone");
         CheckBox checkBox = (CheckBox) hBox.lookup("#checkBox");
 
         setUpDragAndDrop(baseElement, toDoSection);
@@ -86,10 +118,22 @@ public class NodeManager {
         if(node instanceof TitleNode){
             title.setStyle("-fx-font-weight: bold;");
             hBox.getChildren().remove(checkBox);
+            nodeDone.setVisible(false);
+        }else if(node instanceof TaskNode taskNode){
+            hBox.getStyleClass().add("taskNode");
+            nodeDone.setText((int)taskNode.getState() * 100 + "%");
+            taskNode.addPropertyChangeListener(evt -> {
+                nodeDone.setText(Math.round((float)evt.getNewValue() * 100f) + "%");
+            });
+            checkBox.selectedProperty().addListener((observable, oldValue, newValue) -> {
+                taskNode.setState(newValue ? 1f : 0f);
+            });
         }
 
         title.setText(node.getNodeName());
         description.setText(node.getNodeDescription());
+        description.managedProperty().bind(description.visibleProperty());
+        nodeDone.managedProperty().bind(nodeDone.visibleProperty());
 
         return baseElement;
     }
@@ -124,27 +168,7 @@ public class NodeManager {
             Dragboard dragboard = event.getDragboard();
             if (dragboard.hasString() && event.getGestureSource() instanceof NodeBox draggedBox) {
 
-                // Remove VBox from its current parent
-                ((VBox) draggedBox.getParent()).getChildren().remove(draggedBox);
-
-                // Determine where to insert the dragged NodeBox
-                int dropIndex = calculateDropIndex(targetContainer, event.getSceneY());
-
-                // Add TitleBox to the target container at the correct position
-                if(draggedBox.isTitleNode()) targetContainer.getChildren().add(dropIndex, draggedBox);
-                else{
-                    Pane actualTarget = getTargetContainer(sourceContainer, targetContainer, event.getSceneY());
-                    dropIndex = calculateDropIndex(actualTarget, event.getSceneY());
-                    actualTarget.getChildren().add(Math.max(dropIndex, 1), draggedBox);
-
-                    ListNode parent = ((NodeBox) actualTarget).getMyNode();
-                    TaskNode taskNode = (TaskNode) draggedBox.getMyNode();
-                    taskNode.setParent(parent);
-
-                    double width = (double) 200 - 30 * (getDepthOfNode(sourceContainer) - 6);
-                    sourceContainer.setStyle("-fx-max-width: " + width);
-                    System.out.println(sourceContainer.getStyle());
-                }
+                addNodeToParentNode(draggedBox, targetContainer, event.getSceneY());
                 event.setDropCompleted(true);
             } else {
                 event.setDropCompleted(false);
@@ -177,8 +201,8 @@ public class NodeManager {
         return d;
     }
 
-    private boolean checkIfWeAreOnPane(Pane pane, double y) {
-        Bounds bounds = pane.localToScene(pane.getBoundsInLocal());
+    private boolean checkIfWeAreOnPane(Node node, double y) {
+        Bounds bounds = node.localToScene(node.getBoundsInLocal());
 
         return y > bounds.getMinY() && y < bounds.getMaxY();
     }
