@@ -7,6 +7,7 @@ import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import logic.ListNode;
@@ -58,6 +59,7 @@ public class NodeManager {
             for (var child : parentNode.getChildren()) {
                 initializeElementsFromTitleNode(child, baseElement);
             }
+            System.out.println("not empty!");// nothing happens here
         }
         // Add the base element to the container
         if(container != null) container.getChildren().add(baseElement);
@@ -99,17 +101,15 @@ public class NodeManager {
     }
 
     private void setUpDragAndDrop(VBox sourceContainer, VBox targetContainer) {
-        for (var node : sourceContainer.getChildren()) {
-            if (!(node instanceof HBox)) continue;
-            // Enable dragging for each HBox
-            node.setOnDragDetected(event -> {
-                Dragboard dragboard = node.getParent().startDragAndDrop(TransferMode.MOVE);
-                ClipboardContent content = new ClipboardContent();
-                content.putString("NodeBox");
-                dragboard.setContent(content);
-                event.consume();
-            });
-        }
+
+        // Enable dragging for each HBox
+        sourceContainer.setOnDragDetected(event -> {
+            Dragboard dragboard = sourceContainer.startDragAndDrop(TransferMode.MOVE);
+            ClipboardContent content = new ClipboardContent();
+            content.putString("NodeBox");
+            dragboard.setContent(content);
+            event.consume();
+        });
 
         targetContainer.setOnDragOver(event -> {
             if (event.getGestureSource() instanceof VBox && event.getDragboard().hasString()) {
@@ -131,10 +131,9 @@ public class NodeManager {
                 // Add TitleBox to the target container at the correct position
                 if(draggedBox.isTitleNode()) targetContainer.getChildren().add(dropIndex, draggedBox);
                 else{
-                    // detect where we should drop our node box... to which component???
-                    // i want to be able to drop task to:
-                    // to other tasks, then it becomes subtasks!
-                    // to other titles!
+                    Pane actualTarget = getTargetContainer(sourceContainer, targetContainer, event.getSceneY());
+                    dropIndex = calculateDropIndex(actualTarget, event.getSceneY());
+                    actualTarget.getChildren().add(Math.max(dropIndex, 1), draggedBox);
                 }
                 event.setDropCompleted(true);
             } else {
@@ -144,7 +143,27 @@ public class NodeManager {
         });
     }
 
-    private int calculateDropIndex(VBox targetContainer, double dropY) {
+
+    private Pane getTargetContainer(Pane source, Pane currentTarget, double sceneY) {
+
+        if(currentTarget.getChildren().size() == 1) return currentTarget;
+
+        for (var node : currentTarget.getChildren()) {
+            if(!checkIfWeAreOnPane((Pane)node, sceneY) || node == source) continue;
+            if(node instanceof HBox hBox) return currentTarget;
+            return getTargetContainer(source, (Pane) node, sceneY);
+        }
+
+        return currentTarget;
+    }
+
+    private boolean checkIfWeAreOnPane(Pane pane, double y) {
+        Bounds bounds = pane.localToScene(pane.getBoundsInLocal());
+
+        return y > bounds.getMinY() && y < bounds.getMaxY();
+    }
+
+    private int calculateDropIndex(Pane targetContainer, double dropY) {
         for (int i = 0; i < targetContainer.getChildren().size(); i++) {
             Bounds bounds = targetContainer.getChildren().get(i).localToScene(targetContainer.getChildren().get(i).getBoundsInLocal());
             if (dropY < bounds.getMinY() + bounds.getHeight() / 2) {

@@ -8,7 +8,7 @@
 
 <?import logic.NodeBox?>
 <NodeBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" alignment="CENTER" stylesheets="@../css/styles.css">
-    <HBox>
+    <HBox fx:id="taskBody">
         <CheckBox fx:id="checkBox">
 
         </CheckBox>

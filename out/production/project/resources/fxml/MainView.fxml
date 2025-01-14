@@ -13,12 +13,13 @@
     <HBox fx:id="mainApp">
         <ScrollPane styleClass="edge-to-edge">
             <VBox fx:id="toDoSection">
+
             </VBox>
         </ScrollPane>
 
         <VBox fx:id="createNewTaskArea">
-            <TextArea promptText="Title" fx:id="newTitleArea"></TextArea>
-            <TextArea promptText="Description" fx:id="newDescriptionArea"></TextArea>
+            <TextArea promptText="Title" fx:id="newTitleArea"/>
+            <TextArea promptText="Description" fx:id="newDescriptionArea"/>
             <Button onAction="#createNewTask">Create new task!</Button>
         </VBox>
     </HBox>
