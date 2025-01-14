@@ -1,6 +1,7 @@
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Bounds;
+import javafx.scene.Node;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.TextArea;
 import javafx.scene.input.ClipboardContent;
@@ -73,6 +74,7 @@ public class NodeManager {
         NodeBox baseElement = baseNodeLoader.load();
         baseElement.setId(node.getId());
         baseElement.setTitleNode(isTitleNode);
+        baseElement.setMyNode(node);
 
         HBox hBox = (HBox) baseElement.getChildren().getFirst();
         Text title = (Text) hBox.lookup("#nodeTitle");
@@ -134,6 +136,14 @@ public class NodeManager {
                     Pane actualTarget = getTargetContainer(sourceContainer, targetContainer, event.getSceneY());
                     dropIndex = calculateDropIndex(actualTarget, event.getSceneY());
                     actualTarget.getChildren().add(Math.max(dropIndex, 1), draggedBox);
+
+                    ListNode parent = ((NodeBox) actualTarget).getMyNode();
+                    TaskNode taskNode = (TaskNode) draggedBox.getMyNode();
+                    taskNode.setParent(parent);
+
+                    double width = (double) 200 - 30 * (getDepthOfNode(sourceContainer) - 6);
+                    sourceContainer.setStyle("-fx-max-width: " + width);
+                    System.out.println(sourceContainer.getStyle());
                 }
                 event.setDropCompleted(true);
             } else {
@@ -155,6 +165,16 @@ public class NodeManager {
         }
 
         return currentTarget;
+    }
+
+    private int getDepthOfNode(Node node){
+        int d = 0;
+        while(node.getParent() != null){
+            d ++;
+            node = node.getParent();
+        }
+
+        return d;
     }
 
     private boolean checkIfWeAreOnPane(Pane pane, double y) {

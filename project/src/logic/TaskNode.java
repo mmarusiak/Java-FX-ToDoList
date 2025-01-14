@@ -35,6 +35,8 @@ public class TaskNode extends ListNode{
     }
 
     public void setParent(ListNode parent) {
+        if(this.parent != null) this.parent.removeChild(this);
+        parent.addChild(this);
         this.parent = parent;
     }
 

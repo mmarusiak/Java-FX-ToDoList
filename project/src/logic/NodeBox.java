@@ -6,6 +6,7 @@ import javafx.scene.layout.VBox;
 public class NodeBox extends VBox {
 
     private boolean isTitleNode = false;
+    private ListNode myNode;
 
     public NodeBox(){
 
@@ -36,5 +37,13 @@ public class NodeBox extends VBox {
 
     public void setTitleNode(boolean titleNode) {
         isTitleNode = titleNode;
+    }
+
+    public ListNode getMyNode() {
+        return myNode;
+    }
+
+    public void setMyNode(ListNode myNode) {
+        this.myNode = myNode;
     }
 }
