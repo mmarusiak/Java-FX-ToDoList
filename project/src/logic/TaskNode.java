@@ -39,8 +39,17 @@ public class TaskNode extends ListNode{
     }
 
     public void setParent(ListNode parent) {
+        System.out.println(this.parent.getNodeName() + " - " + parent.getNodeName());
+        if(this.parent == parent) return;
         if(this.parent != null) this.parent.removeChild(this);
         parent.addChild(this);
+        this.parent = parent;
+    }
+
+    public void setParentQuietly(ListNode parent) {
+        if(this.parent == parent) return;
+        if(this.parent != null) this.parent.removeChild(this);
+        parent.addChildQuietly(this);
         this.parent = parent;
     }
 
@@ -49,10 +58,17 @@ public class TaskNode extends ListNode{
     }
 
     public void setState(float state) {
+        setState(state, false);
+    }
+
+    public void setState(float state, boolean shouldLookForChildren) {
         support.firePropertyChange("state", this.state, state);
         this.state = state;
 
         parent.updateNodeState(this);
+
+        if(!shouldLookForChildren) return;
+        for(var child : getChildren()) child.setState(state, true);
     }
 
     public void addPropertyChangeListener(PropertyChangeListener listener) {

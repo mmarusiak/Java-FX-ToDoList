@@ -1,6 +1,11 @@
 package logic;
 
+import java.beans.PropertyChangeSupport;
+import java.beans.PropertyChangeListener;
+
 public class TitleNode extends ListNode {
+
+    private final PropertyChangeSupport support = new PropertyChangeSupport(this);
 
     public TitleNode(String nodeName, String nodeDescription) {
         super(nodeName, nodeDescription);
@@ -8,14 +13,33 @@ public class TitleNode extends ListNode {
 
     @Override
     public void updateNodeState(TaskNode nodeChanged) {
-        if (nodeChanged.getState() < 1) return; // just change some information like 30% tasks done
+        if (nodeChanged.getState() < 1 && this == doneTasks) {
+            removeChild(nodeChanged);
+            System.out.println(this.getNodeName());
+            nodeChanged.setParent(unassignedTasks);
+            return;
+        }else if(nodeChanged.getState() < 1) return;
 
         removeChild(nodeChanged);
         moveToDone(nodeChanged);
     }
 
     private void moveToDone(TaskNode doneTask){
-        doneTask.addChild(doneTask);
+        doneTask.setParent(doneTasks);
+    }
+
+    @Override
+    public void addChild(TaskNode child) {
+        super.addChild(child);
+        support.firePropertyChange("child", this, child);
+    }
+
+    public void addPropertyChangeListener(PropertyChangeListener listener) {
+        support.addPropertyChangeListener(listener);
+    }
+
+    public void removePropertyChangeListener(PropertyChangeListener listener) {
+        support.removePropertyChangeListener(listener);
     }
 
     public static TitleNode highPriorityTasks = new TitleNode("High priority tasks" , "Tasks that are important");

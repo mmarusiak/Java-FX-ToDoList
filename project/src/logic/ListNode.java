@@ -43,6 +43,10 @@ public abstract class ListNode {
         children.add(child);
     }
 
+    public void addChildQuietly(TaskNode child){
+        children.add(child);
+    }
+
     public void removeChild(TaskNode child) {
         children.remove(child);
     }

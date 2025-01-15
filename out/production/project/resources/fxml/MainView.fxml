@@ -8,6 +8,7 @@
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.text.Text?>
 <?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
 <VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" spacing="10" alignment="CENTER" fx:controller="NodeManager" stylesheets="@../css/styles.css">
     <Label text="To do app" />
     <HBox fx:id="mainApp">
@@ -18,8 +19,8 @@
         </ScrollPane>
 
         <VBox fx:id="createNewTaskArea">
-            <TextArea promptText="Title" fx:id="newTitleArea"/>
-            <TextArea promptText="Description" fx:id="newDescriptionArea"/>
+            <TextField promptText="Title" fx:id="newTitleArea"/>
+            <TextField promptText="Description" fx:id="newDescriptionArea"/>
             <Button onAction="#createNewTask">Create new task!</Button>
         </VBox>
     </HBox>

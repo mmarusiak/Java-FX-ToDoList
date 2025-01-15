@@ -18,6 +18,7 @@ import logic.TaskNode;
 import logic.TitleNode;
 
 import java.io.IOException;
+import java.util.List;
 
 public class NodeManager {
     @FXML
@@ -34,11 +35,6 @@ public class NodeManager {
         initializeElementsFromTitleNode(TitleNode.lowPriorityTasks);
         initializeElementsFromTitleNode(TitleNode.unassignedTasks);
         initializeElementsFromTitleNode(TitleNode.doneTasks);
-
-        //newTitleArea.setWrapText(false);
-        //newDescriptionArea.setWrapText(false);
-        //newTitleArea.setPrefWidth(80);
-        //newTitleArea.setMaxWidth(80);
     }
 
     public void clearScene(){
@@ -46,8 +42,7 @@ public class NodeManager {
     }
 
     public void addTaskToSection(ListNode parent, TaskNode targetNode) throws IOException {
-        parent.addChild(targetNode);
-        System.out.println(parent.getNodeName() + parent.hashCode());
+        parent.addChildQuietly(targetNode);
         VBox parentBox = (VBox) toDoSection.lookup("#" + parent.getId());
         addNodeToParentNode(createFXNode(targetNode, false), parentBox, 0);
     }
@@ -65,16 +60,19 @@ public class NodeManager {
         else{
             Pane actualTarget = getTargetContainer(child, targetParent, targetY);
             dropIndex = calculateDropIndex(actualTarget, targetY);
-            actualTarget.getChildren().add(Math.max(dropIndex, 1), child);
+
+            addTaskToPane(child, actualTarget, dropIndex);
 
             ListNode parent = ((NodeBox) actualTarget).getMyNode();
             TaskNode taskNode = (TaskNode) child.getMyNode();
-            taskNode.setParent(parent);
-
-            double width = (double) 400 - 30 * (getDepthOfNode(child) - 6);
-            child.setStyle("-fx-max-width: " + width + ";-fx-min-width: " + width + ";");
-            System.out.println(child.getStyle());
+            taskNode.setParentQuietly(parent);
         }
+    }
+
+    private void addTaskToPane(NodeBox child, Pane targetParent, int dropIndex){
+        targetParent.getChildren().add(Math.max(dropIndex, 1), child);
+        double width = (double) 400 - 30 * (getDepthOfNode(child) - 6);
+        child.setStyle("-fx-max-width: " + width + ";-fx-min-width: " + width + ";");
     }
 
     private <T extends ListNode> void initializeElementsFromTitleNode(T parentNode) throws IOException {
@@ -115,24 +113,39 @@ public class NodeManager {
 
         setUpDragAndDrop(baseElement, toDoSection);
 
-        if(node instanceof TitleNode){
+        if(node instanceof TitleNode titleNode){
             title.setStyle("-fx-font-weight: bold;");
             hBox.getChildren().remove(checkBox);
             nodeDone.setVisible(false);
-        }else if(node instanceof TaskNode taskNode){
+            titleNode.addPropertyChangeListener(evt -> {
+                TitleNode targetNode = (TitleNode) evt.getOldValue();
+                TaskNode newValue = (TaskNode) evt.getNewValue();
+
+                Pane pNode = (Pane)toDoSection.lookup( "#" + targetNode.getId());
+                NodeBox cNode = (NodeBox) toDoSection.lookup("#" + newValue.getId());
+                addTaskToPane(cNode, pNode, 0);
+            });
+        }
+        else if(node instanceof TaskNode taskNode){
             hBox.getStyleClass().add("taskNode");
             nodeDone.setText((int)taskNode.getState() * 100 + "%");
             taskNode.addPropertyChangeListener(evt -> {
-                nodeDone.setText(Math.round((float)evt.getNewValue() * 100f) + "%");
+                float newVal = (float) evt.getNewValue();
+                nodeDone.setText(Math.round(newVal * 100f) + "%");
+                checkBox.selectedProperty().setValue(newVal == 1);
+                title.setStyle("-fx-strikethrough: " + (newVal == 1 ? "true" : "false") + ";");
             });
-            checkBox.selectedProperty().addListener((observable, oldValue, newValue) -> {
-                taskNode.setState(newValue ? 1f : 0f);
+            Boolean state = taskNode.getState() == 1;
+            checkBox.setOnMouseClicked(event -> {
+                boolean newValue = checkBox.selectedProperty().getValue();
+                taskNode.setState(newValue ? 1 : 0, !taskNode.getChildren().isEmpty());
             });
         }
 
         title.setText(node.getNodeName());
         description.setText(node.getNodeDescription());
-        description.managedProperty().bind(description.visibleProperty());
+        if(description.getText().isEmpty()) description.managedProperty().set(false);
+        else description.managedProperty().bind(description.visibleProperty());
         nodeDone.managedProperty().bind(nodeDone.visibleProperty());
 
         return baseElement;
@@ -167,7 +180,6 @@ public class NodeManager {
         targetContainer.setOnDragDropped(event -> {
             Dragboard dragboard = event.getDragboard();
             if (dragboard.hasString() && event.getGestureSource() instanceof NodeBox draggedBox) {
-
                 addNodeToParentNode(draggedBox, targetContainer, event.getSceneY());
                 event.setDropCompleted(true);
             } else {

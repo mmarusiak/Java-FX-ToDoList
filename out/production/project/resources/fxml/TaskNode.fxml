@@ -20,5 +20,8 @@
                 lorem ipsum
             </Text>
         </VBox>
+        <Text fx:id="nodeDone">
+            0/0
+        </Text>
     </HBox>
 </NodeBox>
