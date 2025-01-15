@@ -6,9 +6,11 @@ import java.beans.PropertyChangeListener;
 public class TitleNode extends ListNode {
 
     private final PropertyChangeSupport support = new PropertyChangeSupport(this);
+    private String background;
 
-    public TitleNode(String nodeName, String nodeDescription) {
+    public TitleNode(String nodeName, String nodeDescription, String background) {
         super(nodeName, nodeDescription);
+        this.background = background;
     }
 
     @Override
@@ -42,9 +44,13 @@ public class TitleNode extends ListNode {
         support.removePropertyChangeListener(listener);
     }
 
-    public static TitleNode highPriorityTasks = new TitleNode("High priority tasks" , "Tasks that are important");
-    public static TitleNode mediumPriorityTasks = new TitleNode("Medium priority tasks" , "Tasks that are less important");
-    public static TitleNode lowPriorityTasks = new TitleNode("Low priority tasks" , "Tasks that are not important");
-    public static TitleNode unassignedTasks = new TitleNode("Unassigned tasks" , "Tasks that are unassigned");
-    public static TitleNode doneTasks = new TitleNode("Done & won't do tasks" , "Tasks that are done or won't do tasks");
+    public String getBackground() {
+        return background;
+    }
+
+    public static TitleNode highPriorityTasks = new TitleNode("High priority tasks" , "Tasks that are important", "#fa824c");
+    public static TitleNode mediumPriorityTasks = new TitleNode("Medium priority tasks" , "Tasks that are less important", "#e9c46a");
+    public static TitleNode lowPriorityTasks = new TitleNode("Low priority tasks" , "Tasks that are not important", "#3c91e6");
+    public static TitleNode unassignedTasks = new TitleNode("Unassigned tasks" , "Tasks that are unassigned", "#638475");
+    public static TitleNode doneTasks = new TitleNode("Done & won't do tasks" , "Tasks that are done or won't do tasks", "#8e5572");
 }

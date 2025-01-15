@@ -3,7 +3,6 @@ import javafx.fxml.FXMLLoader;
 import javafx.geometry.Bounds;
 import javafx.scene.Node;
 import javafx.scene.control.CheckBox;
-import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.Dragboard;
@@ -16,17 +15,17 @@ import logic.ListNode;
 import logic.NodeBox;
 import logic.TaskNode;
 import logic.TitleNode;
-
 import java.io.IOException;
-import java.util.List;
 
 public class NodeManager {
     @FXML
     private VBox toDoSection;
     @FXML
-    private HBox mainApp;
+    private VBox mainApp;
     @FXML
-    private TextField newTitleArea, newDescriptionArea;
+    private TextField nodeTextField;
+    @FXML
+    private Text nodeTextHelper;
 
     public void initializeScene() throws IOException {
 
@@ -35,7 +34,53 @@ public class NodeManager {
         initializeElementsFromTitleNode(TitleNode.lowPriorityTasks);
         initializeElementsFromTitleNode(TitleNode.unassignedTasks);
         initializeElementsFromTitleNode(TitleNode.doneTasks);
+        nodeTextField.setOnKeyPressed(event -> {
+            String keyCode = event.getCode().toString();
+            if(keyCode.equals("ENTER")) {
+                try {
+                    createNewNode();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            else if(keyCode.equals("ESCAPE"))
+            {
+                done = false;
+                changeNewNodeTexts();
+            }
+        });
     }
+
+    private String title, description;
+    private boolean done = false;
+    public void createNewNode() throws IOException {
+        if(done) {
+            description = nodeTextField.getText();
+            TaskNode newTask = new TaskNode(title, description, TitleNode.unassignedTasks);
+            addTaskToSection(TitleNode.unassignedTasks, newTask);
+        }
+        else title = nodeTextField.getText();
+
+        done = !done;
+        changeNewNodeTexts();
+    }
+
+    private void changeNewNodeTexts(){
+        nodeTextField.clear();
+
+        String newText = !done ? "Title for new task" : "Description for new task";
+        nodeTextField.setPromptText(newText);
+        nodeTextHelper.setText(newText);
+    }
+
+    /*
+    public void createNewTask() throws IOException {
+        String title = newTitleArea.getText();
+        String description = newDescriptionArea.getText();
+        TaskNode newTask = new TaskNode(title, description, TitleNode.unassignedTasks);
+
+        addTaskToSection(TitleNode.unassignedTasks, newTask);
+    }*/
 
     public void clearScene(){
         toDoSection.getChildren().clear();
@@ -71,8 +116,22 @@ public class NodeManager {
 
     private void addTaskToPane(NodeBox child, Pane targetParent, int dropIndex){
         targetParent.getChildren().add(Math.max(dropIndex, 1), child);
-        double width = (double) 400 - 30 * (getDepthOfNode(child) - 6);
-        child.setStyle("-fx-max-width: " + width + ";-fx-min-width: " + width + ";");
+        double width = (double) 300 - 30 * (getDepthOfNode(child) - 6);
+        child.setTranslateX(10);
+        if (child.getWidth() != width) {
+            child.setStyle("-fx-max-width: " + width + ";-fx-min-width: " + width + ";");
+            recalculateChildren(child);
+        }
+    }
+
+    private void recalculateChildren(Pane parent){
+        for(Node child : parent.getChildren()){
+            if(child instanceof NodeBox nodeBox){
+                double width = ((NodeBox) child).getWidth() - 30;
+                child.setStyle("-fx-max-width: " + width + ";-fx-min-width: " + width + ";");
+                recalculateChildren(nodeBox);
+            }
+        }
     }
 
     private <T extends ListNode> void initializeElementsFromTitleNode(T parentNode) throws IOException {
@@ -113,7 +172,7 @@ public class NodeManager {
 
         setUpDragAndDrop(baseElement, toDoSection);
 
-        if(node instanceof TitleNode titleNode){
+        if (node instanceof TitleNode titleNode) {
             title.setStyle("-fx-font-weight: bold;");
             hBox.getChildren().remove(checkBox);
             nodeDone.setVisible(false);
@@ -121,14 +180,15 @@ public class NodeManager {
                 TitleNode targetNode = (TitleNode) evt.getOldValue();
                 TaskNode newValue = (TaskNode) evt.getNewValue();
 
-                Pane pNode = (Pane)toDoSection.lookup( "#" + targetNode.getId());
+                Pane pNode = (Pane) toDoSection.lookup("#" + targetNode.getId());
                 NodeBox cNode = (NodeBox) toDoSection.lookup("#" + newValue.getId());
                 addTaskToPane(cNode, pNode, 0);
             });
-        }
-        else if(node instanceof TaskNode taskNode){
+
+            hBox.setStyle("-fx-background-color: " + titleNode.getBackground() + ";");
+        } else if (node instanceof TaskNode taskNode) {
             hBox.getStyleClass().add("taskNode");
-            nodeDone.setText((int)taskNode.getState() * 100 + "%");
+            nodeDone.setText((int) taskNode.getState() * 100 + "%");
             taskNode.addPropertyChangeListener(evt -> {
                 float newVal = (float) evt.getNewValue();
                 nodeDone.setText(Math.round(newVal * 100f) + "%");
@@ -144,19 +204,11 @@ public class NodeManager {
 
         title.setText(node.getNodeName());
         description.setText(node.getNodeDescription());
-        if(description.getText().isEmpty()) description.managedProperty().set(false);
+        if (description.getText().isEmpty()) description.managedProperty().set(false);
         else description.managedProperty().bind(description.visibleProperty());
         nodeDone.managedProperty().bind(nodeDone.visibleProperty());
 
         return baseElement;
-    }
-
-    public void createNewTask() throws IOException {
-        String title = newTitleArea.getText();
-        String description = newDescriptionArea.getText();
-        TaskNode newTask = new TaskNode(title, description, TitleNode.unassignedTasks);
-
-        addTaskToSection(TitleNode.unassignedTasks, newTask);
     }
 
     private void setUpDragAndDrop(VBox sourceContainer, VBox targetContainer) {
