@@ -173,6 +173,7 @@ public class NodeManager {
         setUpDragAndDrop(baseElement, toDoSection);
 
         if (node instanceof TitleNode titleNode) {
+            hBox.getStyleClass().add("titleNode");
             title.setStyle("-fx-font-weight: bold;");
             hBox.getChildren().remove(checkBox);
             nodeDone.setVisible(false);

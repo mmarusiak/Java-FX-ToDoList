@@ -1,14 +1,42 @@
+.body {
+    -fx-background-color: #f5f5f5;
+}
+
+#mainApp {
+    -fx-alignment: center !important;
+    -fx-translate-x: 50px;
+}
+
 NodeBox {
-    -fx-padding: 10;
+    -fx-padding: 10px;
     -fx-pref-width: 300px;
-    -fx-alignment: center_right;
+    -fx-spacing: 0;
+    -fx-alignment: center_right !important;
+}
+
+.titleNode {
+    -fx-max-height: 30px;
+    -fx-pref-height: 30px;
+}
+
+.titleNode > VBox > #nodeDescription {
+    visibility: hidden;
+}
+
+.titleNode:hover {
+    -fx-max-height: 60px !important;
+    -fx-pref-height: 60px;
+}
+
+.titleNode:hover > VBox > #nodeDescription{
+    visibility: visible !important;
 }
 
 .taskNode {
-    -fx-max-height: 50px;
-    -fx-min-height: 50px;
+    -fx-max-height: 40px;
+    -fx-min-height: 40px;
     -fx-padding: 10px !important;
-    -fx-background-radius: 5px !important;
+    -fx-background-radius: 15px !important;
 }
 
 .taskNode > VBox {
@@ -36,7 +64,7 @@ NodeBox {
 }
 
 #toDoSection HBox {
-    -fx-background-color: #F0F0F0;
+    -fx-background-color: #e8e8e8;
     -fx-padding: 20px;
     -fx-spacing: 10px;
     -fx-alignment: center_left;
@@ -52,9 +80,11 @@ ScrollPane {
     -fx-max-width: 400px;
     -fx-min-width: 380px;
     -fx-background: transparent;
-    -fx-max-height: 500px;
+    -fx-max-height: 400px;
+    -fx-pref-height: 400px;
     -fx-vbar-policy: never;
     -fx-hbar-policy: never;
+    -fx-alignment: center_right;
 }
 
 #nodeTitle {
@@ -62,35 +92,42 @@ ScrollPane {
     -fx-font-size: 14px;
 }
 
-#mainApp{
-    -fx-alignment: center;
+.createNewTaskArea {
+    -fx-spacing: 5px;
+    -fx-padding: 20px;
+    -fx-alignment: center !important;
 }
 
-#createNewTaskArea {
-    -fx-padding: 20px;
-    -fx-alignment: center;
+.createNewTaskArea > * {
+    -fx-alignment: center !important;
+    -fx-border-width: 5;
+    -fx-translate-x: -50;
 }
 
 TextField{
-
-    -fx-pref-width: 120px;
-    -fx-max-width: 120px;
+    -fx-pref-width: 200px;
+    -fx-max-width: 200px;
     -fx-text-alignment: center;
     -fx-max-height: 20px;
-}
-
-#createTaskArea {
-    -fx-pref-width: 100px;
-    -fx-background-color: blue !important;
 }
 
 #textContainer {
     -fx-alignment: center_left;
 }
 
-CheckBox {
-    -fx-max-width: 30px;
-    -fx-min-width: 20px;
-    -fx-max-height:  30px;
-    -fx-min-height:  20px;
+.check-box > .box {
+    -fx-max-width: 15px;
+    -fx-min-width: 15px;
+    -fx-max-height:  15px;
+    -fx-min-height:  15px;
+    -fx-pref-height: 15px;
+    -fx-pref-width: 15px;
+    -fx-border-radius: 5px;
+    -fx-border-color: #d2d2d2;
+    -fx-border-width: 1px;
+    -fx-background-color: #e8e8e8;
+}
+
+.check-box:selected > .box {
+    -fx-background-color: #d2d2d2;
 }
