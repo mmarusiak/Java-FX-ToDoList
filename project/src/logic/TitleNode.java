@@ -17,7 +17,6 @@ public class TitleNode extends ListNode {
     public void updateNodeState(TaskNode nodeChanged) {
         if (nodeChanged.getState() < 1 && this == doneTasks) {
             removeChild(nodeChanged);
-            System.out.println(this.getNodeName());
             nodeChanged.setParent(unassignedTasks);
             return;
         }else if(nodeChanged.getState() < 1) return;

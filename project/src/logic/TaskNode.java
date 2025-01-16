@@ -24,6 +24,8 @@ public class TaskNode extends ListNode{
 
     public float calculateState(){
 
+        if(getChildren().isEmpty()) return 0;
+
         float sum = 0;
         for (var child : getChildren()) sum += child.getState();
 
@@ -39,7 +41,6 @@ public class TaskNode extends ListNode{
     }
 
     public void setParent(ListNode parent) {
-        System.out.println(this.parent.getNodeName() + " - " + parent.getNodeName());
         if(this.parent == parent) return;
         if(this.parent != null) this.parent.removeChild(this);
         parent.addChild(this);
@@ -77,5 +78,23 @@ public class TaskNode extends ListNode{
 
     public void removePropertyChangeListener(PropertyChangeListener listener) {
         support.removePropertyChangeListener(listener);
+    }
+
+    @Override
+    public void addChild(TaskNode child) {
+        super.addChild(child);
+        setState(calculateState());
+    }
+
+    @Override
+    public void addChildQuietly(TaskNode child) {
+        super.addChildQuietly(child);
+        setState(calculateState());
+    }
+
+    @Override
+    public void removeChild(TaskNode child) {
+        super.removeChild(child);
+        setState(calculateState());
     }
 }
