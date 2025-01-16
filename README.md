@@ -19,3 +19,5 @@ Managing tasks, subtasks: - removing subtasks, uncheck tasks, move whole tasks o
 <img src="https://github.com/user-attachments/assets/2561bc51-97b3-4f6b-9196-e4c1b165db7f" style="width: 50%;"/>
 
 Code is a bit messy, but it was my first time doing GUI in JavaFX. It was pretty neat experience, but styling via ``css`` has a lot of weird rules, and most of classic web rules just doesnt work here, which was very annoying.
+
+Built using Maven and JavaFX.
