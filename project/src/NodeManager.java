@@ -2,20 +2,20 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Bounds;
 import javafx.scene.Node;
+import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.TextField;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.TransferMode;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.text.Text;
 import logic.ListNode;
 import logic.NodeBox;
 import logic.TaskNode;
 import logic.TitleNode;
 import java.io.IOException;
+import java.util.Objects;
 
 public class NodeManager {
     @FXML
@@ -51,6 +51,7 @@ public class NodeManager {
         });
     }
 
+    // user input for creating new task
     private String title, description;
     private boolean done = false;
     public void createNewNode() throws IOException {
@@ -72,15 +73,6 @@ public class NodeManager {
         nodeTextField.setPromptText(newText);
         nodeTextHelper.setText(newText);
     }
-
-    /*
-    public void createNewTask() throws IOException {
-        String title = newTitleArea.getText();
-        String description = newDescriptionArea.getText();
-        TaskNode newTask = new TaskNode(title, description, TitleNode.unassignedTasks);
-
-        addTaskToSection(TitleNode.unassignedTasks, newTask);
-    }*/
 
     public void clearScene(){
         toDoSection.getChildren().clear();
@@ -169,6 +161,10 @@ public class NodeManager {
         Text description = (Text) hBox.lookup("#nodeDescription");
         Text nodeDone = (Text) hBox.lookup("#nodeDone");
         CheckBox checkBox = (CheckBox) hBox.lookup("#checkBox");
+        Region spacer = (Region) hBox.lookup("#spacer");
+        Button deleteNodeButton = (Button) hBox.lookup("#deleteNodeButton");
+
+        HBox.setHgrow(spacer, Priority.ALWAYS);
 
         setUpDragAndDrop(baseElement, toDoSection);
 
@@ -183,7 +179,9 @@ public class NodeManager {
 
                 Pane pNode = (Pane) toDoSection.lookup("#" + targetNode.getId());
                 NodeBox cNode = (NodeBox) toDoSection.lookup("#" + newValue.getId());
-                addTaskToPane(cNode, pNode, 0);
+
+                if(Objects.equals(evt.getPropertyName(), "child_added")) addTaskToPane(cNode, pNode, 0);
+                else pNode.getChildren().remove(cNode);
             });
 
             hBox.setStyle("-fx-background-color: " + titleNode.getBackground() + ";");
@@ -191,15 +189,24 @@ public class NodeManager {
             hBox.getStyleClass().add("taskNode");
             nodeDone.setText((int) taskNode.getState() * 100 + "%");
             taskNode.addPropertyChangeListener(evt -> {
-                float newVal = (float) evt.getNewValue();
-                nodeDone.setText(Math.round(newVal * 100f) + "%");
-                checkBox.selectedProperty().setValue(newVal == 1);
-                title.setStyle("-fx-strikethrough: " + (newVal == 1 ? "true" : "false") + ";");
+                if(evt.getPropertyName().equals("state")) {
+                    float newVal = (float) evt.getNewValue();
+                    nodeDone.setText(Math.round(newVal * 100f) + "%");
+                    checkBox.selectedProperty().setValue(newVal == 1);
+                    title.setStyle("-fx-strikethrough: " + (newVal == 1 ? "true" : "false") + ";");
+                }
+                else{
+                    TaskNode child = (TaskNode) evt.getNewValue();
+                    baseElement.getChildren().remove(baseElement.lookup("#" + child.getId()));
+                }
             });
             Boolean state = taskNode.getState() == 1;
             checkBox.setOnMouseClicked(event -> {
                 boolean newValue = checkBox.selectedProperty().getValue();
                 taskNode.setState(newValue ? 1 : 0, !taskNode.getChildren().isEmpty());
+            });
+            deleteNodeButton.setOnMouseClicked(event -> {
+                taskNode.deleteTask();
             });
         }
 
@@ -208,6 +215,7 @@ public class NodeManager {
         if (description.getText().isEmpty()) description.managedProperty().set(false);
         else description.managedProperty().bind(description.visibleProperty());
         nodeDone.managedProperty().bind(nodeDone.visibleProperty());
+        deleteNodeButton.managedProperty().bind(deleteNodeButton.visibleProperty());
 
         return baseElement;
     }

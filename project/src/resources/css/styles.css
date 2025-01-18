@@ -28,6 +28,12 @@ NodeBox {
     -fx-pref-height: 60px;
 }
 
+.titleNode > Button, .taskNode > Button {
+    -fx-background-color: transparent;
+    -fx-font-weight: bold;
+    visibility: hidden;
+}
+
 .titleNode:hover > VBox > #nodeDescription{
     visibility: visible !important;
 }
@@ -49,6 +55,10 @@ NodeBox {
 
 .taskNode> VBox > #nodeTitle {
     -fx-font-size: 12px !important;
+}
+
+.taskNode:hover > Button {
+    visibility: visible;
 }
 
 .taskNode:hover > VBox > #nodeDescription {

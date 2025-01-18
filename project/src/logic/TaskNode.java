@@ -96,5 +96,15 @@ public class TaskNode extends ListNode{
     public void removeChild(TaskNode child) {
         super.removeChild(child);
         setState(calculateState());
+        support.firePropertyChange("remove_child", this, child);
+    }
+
+    public void deleteTask(){
+        if(getChildren().isEmpty()) {
+            parent.removeChild(this);
+            return;
+        }
+        while (!getChildren().isEmpty()) getChildren().getFirst().deleteTask();
+        deleteTask();
     }
 }

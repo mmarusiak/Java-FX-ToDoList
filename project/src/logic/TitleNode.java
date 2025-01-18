@@ -32,7 +32,13 @@ public class TitleNode extends ListNode {
     @Override
     public void addChild(TaskNode child) {
         super.addChild(child);
-        support.firePropertyChange("child", this, child);
+        support.firePropertyChange("child_added", this, child);
+    }
+
+    @Override
+    public void removeChild(TaskNode child) {
+        super.removeChild(child);
+        support.firePropertyChange("child_removed", this, child);
     }
 
     public void addPropertyChangeListener(PropertyChangeListener listener) {
