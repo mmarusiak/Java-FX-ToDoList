@@ -177,11 +177,14 @@ public class NodeManager {
                 TitleNode targetNode = (TitleNode) evt.getOldValue();
                 TaskNode newValue = (TaskNode) evt.getNewValue();
 
+                System.out.println(newValue.getId());
+                System.out.println(targetNode.getId());
+
                 Pane pNode = (Pane) toDoSection.lookup("#" + targetNode.getId());
                 NodeBox cNode = (NodeBox) toDoSection.lookup("#" + newValue.getId());
 
                 if(Objects.equals(evt.getPropertyName(), "child_added")) addTaskToPane(cNode, pNode, 0);
-                else pNode.getChildren().remove(cNode);
+                else if(Objects.equals(evt.getPropertyName(), "child_removed")) pNode.getChildren().remove(cNode);
             });
 
             hBox.setStyle("-fx-background-color: " + titleNode.getBackground() + ";");
@@ -195,7 +198,7 @@ public class NodeManager {
                     checkBox.selectedProperty().setValue(newVal == 1);
                     title.setStyle("-fx-strikethrough: " + (newVal == 1 ? "true" : "false") + ";");
                 }
-                else{
+                else if (evt.getPropertyName().equals("child_removed")) {
                     TaskNode child = (TaskNode) evt.getNewValue();
                     baseElement.getChildren().remove(baseElement.lookup("#" + child.getId()));
                 }

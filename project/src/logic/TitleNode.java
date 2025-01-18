@@ -16,12 +16,12 @@ public class TitleNode extends ListNode {
     @Override
     public void updateNodeState(TaskNode nodeChanged) {
         if (nodeChanged.getState() < 1 && this == doneTasks) {
-            removeChild(nodeChanged);
+            removeChildQuietly(nodeChanged);
             nodeChanged.setParent(unassignedTasks);
             return;
         }else if(nodeChanged.getState() < 1) return;
 
-        removeChild(nodeChanged);
+        removeChildQuietly(nodeChanged);
         moveToDone(nodeChanged);
     }
 
@@ -32,11 +32,17 @@ public class TitleNode extends ListNode {
     @Override
     public void addChild(TaskNode child) {
         super.addChild(child);
+        System.out.println("I want to add child " + child.getId());
         support.firePropertyChange("child_added", this, child);
     }
 
     @Override
-    public void removeChild(TaskNode child) {
+    public void removeChildQuietly(TaskNode child) {
+        super.removeChild(child);
+    }
+
+    @Override
+    public void removeChild(TaskNode child){
         super.removeChild(child);
         support.firePropertyChange("child_removed", this, child);
     }

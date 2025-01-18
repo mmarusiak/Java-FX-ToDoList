@@ -51,6 +51,10 @@ public abstract class ListNode {
         children.remove(child);
     }
 
+    public void removeChildQuietly(TaskNode child) {
+        children.remove(child);
+    }
+
     public String getId(){
         return nodeName.replaceAll(" ", "") + hashCode();
     }

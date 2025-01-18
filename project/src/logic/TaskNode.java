@@ -42,14 +42,14 @@ public class TaskNode extends ListNode{
 
     public void setParent(ListNode parent) {
         if(this.parent == parent) return;
-        if(this.parent != null) this.parent.removeChild(this);
+        if(this.parent != null) this.parent.removeChildQuietly(this);
         parent.addChild(this);
         this.parent = parent;
     }
 
     public void setParentQuietly(ListNode parent) {
         if(this.parent == parent) return;
-        if(this.parent != null) this.parent.removeChild(this);
+        if(this.parent != null) this.parent.removeChildQuietly(this);
         parent.addChildQuietly(this);
         this.parent = parent;
     }
@@ -94,9 +94,9 @@ public class TaskNode extends ListNode{
 
     @Override
     public void removeChild(TaskNode child) {
-        super.removeChild(child);
+        super.removeChildQuietly(child);
         setState(calculateState());
-        support.firePropertyChange("remove_child", this, child);
+        support.firePropertyChange("child_removed", this, child);
     }
 
     public void deleteTask(){
