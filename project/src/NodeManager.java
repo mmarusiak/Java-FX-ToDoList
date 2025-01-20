@@ -34,6 +34,10 @@ public class NodeManager {
         initializeElementsFromTitleNode(TitleNode.lowPriorityTasks);
         initializeElementsFromTitleNode(TitleNode.unassignedTasks);
         initializeElementsFromTitleNode(TitleNode.doneTasks);
+        initializeUserInput();
+    }
+
+    private void initializeUserInput(){
         nodeTextField.setOnKeyPressed(event -> {
             String keyCode = event.getCode().toString();
             if(keyCode.equals("ENTER")) {
@@ -50,6 +54,28 @@ public class NodeManager {
             }
         });
     }
+
+    private <T extends ListNode> void initializeElementsFromTitleNode(T parentNode) throws IOException {
+
+        toDoSection.getChildren().add(initializeElementsFromTitleNode(parentNode, null));
+    }
+
+
+    private <T extends ListNode> NodeBox initializeElementsFromTitleNode(T parentNode, VBox container) throws IOException{
+
+        NodeBox baseElement = createFXNode(parentNode, true);
+
+        if(!parentNode.getChildren().isEmpty()) {
+            for (var child : parentNode.getChildren()) {
+                initializeElementsFromTitleNode(child, baseElement);
+            }
+            System.out.println("not empty!");// nothing happens here
+        }
+        // Add the base element to the container
+        if(container != null) container.getChildren().add(baseElement);
+        return baseElement;
+    }
+
 
     // user input for creating new task
     private String title, description;
@@ -126,27 +152,6 @@ public class NodeManager {
         }
     }
 
-    private <T extends ListNode> void initializeElementsFromTitleNode(T parentNode) throws IOException {
-
-        toDoSection.getChildren().add(initializeElementsFromTitleNode(parentNode, null));
-    }
-
-
-    private <T extends ListNode> NodeBox initializeElementsFromTitleNode(T parentNode, VBox container) throws IOException{
-
-        NodeBox baseElement = createFXNode(parentNode, true);
-
-        if(!parentNode.getChildren().isEmpty()) {
-            for (var child : parentNode.getChildren()) {
-                initializeElementsFromTitleNode(child, baseElement);
-            }
-            System.out.println("not empty!");// nothing happens here
-        }
-        // Add the base element to the container
-        if(container != null) container.getChildren().add(baseElement);
-        return baseElement;
-    }
-
     private NodeBox createFXNode(ListNode node, boolean isTitleNode) throws IOException {
 
         FXMLLoader baseNodeLoader = new FXMLLoader(getClass().getResource("resources/fxml/TaskNode.fxml"));
@@ -176,9 +181,6 @@ public class NodeManager {
             titleNode.addPropertyChangeListener(evt -> {
                 TitleNode targetNode = (TitleNode) evt.getOldValue();
                 TaskNode newValue = (TaskNode) evt.getNewValue();
-
-                System.out.println(newValue.getId());
-                System.out.println(targetNode.getId());
 
                 Pane pNode = (Pane) toDoSection.lookup("#" + targetNode.getId());
                 NodeBox cNode = (NodeBox) toDoSection.lookup("#" + newValue.getId());

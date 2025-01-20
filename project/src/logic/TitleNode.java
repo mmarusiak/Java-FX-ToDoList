@@ -32,7 +32,6 @@ public class TitleNode extends ListNode {
     @Override
     public void addChild(TaskNode child) {
         super.addChild(child);
-        System.out.println("I want to add child " + child.getId());
         support.firePropertyChange("child_added", this, child);
     }
 
